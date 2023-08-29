@@ -63,7 +63,7 @@ No rocket-science here.
 * Select the `.csv` file with the BaseLinker order list and then press "Download Designs" to download the designs associated with the orders.
 
 * Structure of the `.csv` file downloaded from BaseLinker:
-![BLOrders_csv_file](https://imageupload.io/ib/X1Brot57ypqccJs_1693317162.png)
+![BLOrders_csv_file](https://imageupload.io/ib/X1Brot57ypqccJs_1693317162.png)  
 * Columns headers are hardcoded as:
     * **A** ==> `Nr zamówienia` translates to `Order ID`
     * **B** ==> `Ilość sztuk nadruku` translates to `qunatity of design`
