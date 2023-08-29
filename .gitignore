@@ -1,0 +1,9 @@
+/TESTING
+/venv
+/__pycache__
+/Executable
+Baselinker*
+/logs
+token_drive_v3.pickle
+credentials.json
+.env
