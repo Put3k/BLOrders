@@ -36,7 +36,7 @@ $ pip install -r requirements.txt                   #Install required packages
     * white PNG files
     * white PDF files
     * black PNG files
-    * black PDF files
+    * black PDF files  
     For now, regex is set to find strictly defined codes. I'm considering introducing functionality in the future for specifying codes along with showing samples of them.
 4. Run `BLOrders.py`:
 ```bash
