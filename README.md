@@ -65,8 +65,8 @@ No rocket-science here.
 * Structure of the `.csv` file downloaded from BaseLinker:
 ![BLOrders_csv_file](https://imageupload.io/ib/X1Brot57ypqccJs_1693317162.png)
 * Columns headers are hardcoded as:
-    * **A** ==> `Nr zamówienia`
-    * **B** ==> `Ilość sztuk nadruku`
+    * **A** ==> `Nr zamówienia` translates to `Order ID`
+    * **B** ==> `Ilość sztuk nadruku` translates to `qunatity of design`
     * **C** ==> `SKU`
     Column indexes are determined by the headers. The headers can be anywhere in the **first row**.
 
