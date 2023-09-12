@@ -36,7 +36,7 @@ $ pip install -r requirements.txt                   #Install required packages
     * white PNG files
     * white PDF files
     * black PNG files
-    * black PDF files
+    * black PDF files  
     For now, regex is set to find strictly defined codes. I'm considering introducing functionality in the future for specifying codes along with showing samples of them.
 4. Run `BLOrders.py`:
 ```bash
@@ -63,10 +63,10 @@ No rocket-science here.
 * Select the `.csv` file with the BaseLinker order list and then press "Download Designs" to download the designs associated with the orders.
 
 * Structure of the `.csv` file downloaded from BaseLinker:
-![BLOrders_csv_file](https://imageupload.io/ib/X1Brot57ypqccJs_1693317162.png)
+![BLOrders_csv_file](https://imageupload.io/ib/X1Brot57ypqccJs_1693317162.png)  
 * Columns headers are hardcoded as:
-    * **A** ==> `Nr zamówienia`
-    * **B** ==> `Ilość sztuk nadruku`
+    * **A** ==> `Nr zamówienia` translates to `Order ID`
+    * **B** ==> `Ilość sztuk nadruku` translates to `qunatity of design`
     * **C** ==> `SKU`
     Column indexes are determined by the headers. The headers can be anywhere in the **first row**.
 
