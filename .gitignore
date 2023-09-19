@@ -1,6 +1,7 @@
 /TESTING
 /venv
 /__pycache__
+/exe
 /Executable
 Baselinker*
 /logs

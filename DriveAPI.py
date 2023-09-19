@@ -81,7 +81,6 @@ def get_product_type(sku):
     for product in products:
         if re.search(product, sku):
             return product
-
     return None
 
 #get file type to download: "pdf" or "png"
@@ -107,7 +106,7 @@ class Order:
         self.design_name = get_design(self.code)            #design name - ZAJZAW
         self.product_type = get_product_type(self.sku)      #product type
         self.file_type = get_file_type(self.product_type)   #design file type ===> "pdf" or "png"
-        self.design_color = self.get_design_color()     #Colors are black or white.
+        self.design_color = self.get_design_color()         #Colors are black or white.
         self.endcode = get_design_endcode(self.code)
 
         self.design_folder_id = self.get_folder_id()
@@ -154,6 +153,32 @@ class Order:
                 if prod_type in self.sku:
                     return "black"
         return None
+
+    #returns destination folder string
+    @property
+    def destination_folder(self):
+        #Create Different folder for KUBKI, KOSZ, and KOSZ_DZIEC for sizes: 3-4, 5-6, 7-8
+        SMALL_SIZES = ["3-4", "5-6", "7-8"]
+        PRODUCTS = ["LEZAK", "KOSZ", "POD", "KB_ZW", "KB_MAG", "KB_FUN"]
+
+        for product in PRODUCTS:
+            if re.search(product, self.sku):
+                label = product
+                break
+            label = None
+
+        if label:
+            if label == "KOSZ":
+                for size in SMALL_SIZES:
+                    if re.search(size, self.sku):
+                        return "KOSZ_DZIECIECE"
+                return "KOSZ_DOROSLI"
+            elif label in ["KB_ZW", "KB_FUN", "KB_MAG"]:
+                return "Kubki"
+            else:
+                return label
+        else:
+            save_error_to_file(f"Could not label where to save '{self.sku}' file.")
 
 
 #get data from csv file
@@ -312,12 +337,15 @@ def download_file(order):
     downloader = MediaIoBaseDownload(fd=file, request=request)
     done = False
 
-    if order.product_type in ["KB_ZW", "KB_MAG", "KB_FUN"]:
-        file_path = os.path.join(folder_path, "Kubki", file_name)
-        category_folder = os.path.join(folder_path, "Kubki")
-    else:
-        file_path = os.path.join(folder_path, order.product_type, file_name)
-        category_folder = os.path.join(folder_path, order.product_type)
+    # if order.product_type in ["KB_ZW", "KB_MAG", "KB_FUN"]:
+    #     file_path = os.path.join(folder_path, "Kubki", file_name)
+    #     category_folder = os.path.join(folder_path, "Kubki")
+    # else:
+    #     file_path = os.path.join(folder_path, order.product_type, file_name)
+    #     category_folder = os.path.join(folder_path, order.product_type)
+
+    file_path = os.path.join(folder_path, order.destination_folder, file_name)
+    category_folder = os.path.join(folder_path, order.destination_folder)
 
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
@@ -399,8 +427,6 @@ def main(csv_file_path):
     global folder_path
     global error_path
     folder_path = os.path.join(os.getcwd(), f"Baselinker - {dt_string}")
-    # error_file_path = os.path.join(os.getcwd(), "Errors")
-    # error_path = os.path.join(folder_path, error_file_path)
 
     if csv_file_path and service:
         order_list = get_orders(csv_file_path)
