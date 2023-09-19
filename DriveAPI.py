@@ -1,5 +1,6 @@
 import csv
 import io
+import json
 import os
 import re
 import sys
@@ -415,10 +416,19 @@ def main(csv_file_path):
     global BLACK_SHIRT_FOLDER_ID
     global BLACK_CUP_FOLDER_ID
 
-    WHITE_SHIRT_FOLDER_ID = os.getenv('WHITE_SHIRT_FOLDER_ID')
-    WHITE_CUP_FOLDER_ID = os.getenv('WHITE_CUP_FOLDER_ID')
-    BLACK_SHIRT_FOLDER_ID = os.getenv('BLACK_SHIRT_FOLDER_ID')
-    BLACK_CUP_FOLDER_ID = os.getenv('BLACK_CUP_FOLDER_ID')
+
+    DRIVES_PATH = resource_path('drive_folders_destination.json')
+    with open(DRIVES_PATH) as f:
+        drive_dest = json.load(f)
+
+        WHITE_SHIRT_FOLDER_ID = drive_dest.get('WHITE_SHIRT_FOLDER_ID')
+        WHITE_CUP_FOLDER_ID = drive_dest.get('WHITE_CUP_FOLDER_ID')
+        BLACK_SHIRT_FOLDER_ID = drive_dest.get('BLACK_SHIRT_FOLDER_ID')
+        BLACK_CUP_FOLDER_ID = drive_dest.get('BLACK_CUP_FOLDER_ID')
+
+    if not WHITE_SHIRT_FOLDER_ID and WHITE_CUP_FOLDER_ID and BLACK_SHIRT_FOLDER_ID and BLACK_CUP_FOLDER_ID:
+        print(f"Could not get drive folders ID's")
+        return False
 
     date_time_now = datetime.now()
     global dt_string
