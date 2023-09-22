@@ -330,7 +330,12 @@ def list_order_files_id(order_list):
 
 def download_file(order):
     file_id = order.file_id
-    file_name = " - ".join([order.order_id, f"x{order.quantity}", order.file_name])
+
+    #check wheter shirt is for small size or not. If True, add 'DZIECIECE' to file name.
+    if order.destination_folder == "KOSZ_DZIECIECE":
+        file_name = " - ".join(["KOSZ_DZIECIECE", order.order_id, f"x{order.quantity}", order.file_name])
+    else:
+        file_name = " - ".join([order.order_id, f"x{order.quantity}", order.file_name])
     request = service.files().get_media(fileId=file_id)
 
     file = io.BytesIO()
