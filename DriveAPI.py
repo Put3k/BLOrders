@@ -113,6 +113,7 @@ class Order:
         self.design_folder_id = self.get_folder_id()
         self.searched_codes = []
         self.file_id, self.file_name = recursive_find_exact_file_id(self)                #design file id in Google Drive
+        self.is_adult = is_adult(self.sku)                                              #Is a small or big format print (big => adults; samll => kids)
 
         self.status = False
 
@@ -182,6 +183,26 @@ class Order:
             save_error_to_file(f"Could not label where to save '{self.sku}' file.")
 
 
+def is_adult(sku):
+    SMALL_SIZES = ["3-4", "5-6", "7-8"]
+    PRODUCTS = ["LEZAK", "KOSZ", "POD", "KB_ZW", "KB_MAG", "KB_FUN"]
+    for product in PRODUCTS:
+        if re.search(product, sku):
+            label = product
+            break
+        label = None
+
+    if label:
+        if label == "KOSZ":
+            for size in SMALL_SIZES:
+                if re.search(size, sku):
+                    return False
+            return True
+        else:
+            False
+    else:
+        save_error_to_file(f"Could not determine product type from: '{sku}' file.")
+
 #get data from csv file
 def get_orders(csv_file_path):
 
@@ -205,7 +226,8 @@ def get_orders(csv_file_path):
                     code = get_code(sku)
                     product_type = get_product_type(sku)
 
-                    matching_order = next((order for order in order_list if order.order_id == order_id and product_type == order.product_type and (order.code == code or order.first_code == code)), None)
+
+                    matching_order = next((order for order in order_list if order.order_id == order_id and product_type == order.product_type and (order.code == code or order.first_code == code) and is_adult(sku) == order.is_adult), None)
 
                     if matching_order is not None:
                         matching_order.quantity += quantity
@@ -217,7 +239,6 @@ def get_orders(csv_file_path):
 
 
 def find_exact_file_id(order):
-
     log = "\n"
 
     if order.design_folder_id and order.code and order.file_type:
