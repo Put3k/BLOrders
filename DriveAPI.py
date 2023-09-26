@@ -179,7 +179,11 @@ class Order:
             if label == "KOSZ":
                 for size in SMALL_SIZES:
                     if re.search(size, self.sku):
+                        if self.design_color == "black_ht":
+                            return "HALFTONE_KOSZ_DZIECIECE"
                         return "KOSZ_DZIECIECE"
+                if self.design_color == "black_ht":
+                    return "HALFTONE_KOSZ_DOROSLI"
                 return "KOSZ_DOROSLI"
             elif label in ["KB_ZW", "KB_FUN", "KB_MAG"]:
                 return "Kubki"
@@ -362,10 +366,14 @@ def download_file(order):
     file_id = order.file_id
 
     #check wheter shirt is for small size or not. If True, add 'DZIECIECE' to file name.
-    if order.destination_folder == "KOSZ_DZIECIECE":
+    if order.destination_folder == "HALFTONE_KOSZ_DZIECIECE":
+        file_name = " - ".join(["HALFTONE_KOSZ_DZIECIECE", order.order_id, f"x{order.quantity}", order.file_name])
+    elif order.destination_folder == "KOSZ_DZIECIECE":
         file_name = " - ".join(["KOSZ_DZIECIECE", order.order_id, f"x{order.quantity}", order.file_name])
+    elif order.destination_folder == "HALFTONE_KOSZ_DOROSLI":
+        file_name = " - ".join(["HALFTONE_KOSZ_DOROSLI", order.order_id, f"x{order.quantity}", order.file_name])
     else:
-        file_name = " - ".join([order.order_id, f"x{order.quantity}", order.file_name])
+        file_name = " - ".join(["KOSZ_DOROSLI", order.order_id, f"x{order.quantity}", order.file_name])
     request = service.files().get_media(fileId=file_id)
 
     file = io.BytesIO()
