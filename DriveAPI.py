@@ -41,6 +41,7 @@ def get_code(sku):
     code = re.sub(r"_XS$|_S$|_M$|_L$|_XL$|_XXL$|_3-4|_5-6|_7-8|_9-11|_12-14$", "", code)
     code = re.sub(r"^_B_|^_C_", "", code)
     code = re.sub(r"^_|_$", "", code)
+    code = re.sub(r"_H999", "", code)
     return code
 
 
@@ -123,7 +124,9 @@ class Order:
     def get_folder_id(self):
         if self.product_type in ["KOSZ", "POD", "LEZAK"]:
             self.file_name = self.code + ".png"
-            if self.design_color == "white":
+            if self.design_color == "black_ht":
+                return BLACK_HALFTONE_SHIRT_FOLDER_ID
+            elif self.design_color == "white":
                 return WHITE_SHIRT_FOLDER_ID
             elif self.design_color == "black":
                 return BLACK_SHIRT_FOLDER_ID
@@ -139,6 +142,9 @@ class Order:
 
         WHITE_TYPE = ["KOSZ_MES_B", "KOSZ_DAM_B", "KOSZ_DZIEC_CHLOP_B", "KB_ZW", "KB_MAG", "POD_ZW"]
         BLACK_TYPE = ["KOSZ_MES_C", "KOSZ_DAM_C", "KB_FUN_C"]
+
+        if "H999" in self.sku:
+            return "black_ht"
 
         suffix = re.search(r"\d{2,4}[A-Z]", self.code)
         if suffix:
@@ -242,7 +248,10 @@ def find_exact_file_id(order):
     log = "\n"
 
     if order.design_folder_id and order.code and order.file_type:
-        design_code = order.code + order.file_type
+        if order.design_color == "black_ht":
+            design_code = order.code + "_H999" + order.file_type
+        else:
+            design_code = order.code + order.file_type
 
         query = f"'{order.design_folder_id}' in parents and name = '{design_code}'"
         page_token = None
@@ -441,6 +450,7 @@ def main(csv_file_path):
     global WHITE_CUP_FOLDER_ID
     global BLACK_SHIRT_FOLDER_ID
     global BLACK_CUP_FOLDER_ID
+    global BLACK_HALFTONE_SHIRT_FOLDER_ID
 
 
     DRIVES_PATH = resource_path('drive_folders_destination.json')
@@ -451,8 +461,9 @@ def main(csv_file_path):
         WHITE_CUP_FOLDER_ID = drive_dest.get('WHITE_CUP_FOLDER_ID')
         BLACK_SHIRT_FOLDER_ID = drive_dest.get('BLACK_SHIRT_FOLDER_ID')
         BLACK_CUP_FOLDER_ID = drive_dest.get('BLACK_CUP_FOLDER_ID')
+        BLACK_HALFTONE_SHIRT_FOLDER_ID = drive_dest.get('BLACK_HALFTONE_SHIRT_FOLDER_ID')
 
-    if not WHITE_SHIRT_FOLDER_ID and WHITE_CUP_FOLDER_ID and BLACK_SHIRT_FOLDER_ID and BLACK_CUP_FOLDER_ID:
+    if not (WHITE_SHIRT_FOLDER_ID and WHITE_CUP_FOLDER_ID and BLACK_SHIRT_FOLDER_ID and BLACK_CUP_FOLDER_ID and BLACK_HALFTONE_SHIRT_FOLDER_ID):
         print(f"Could not get drive folders ID's")
         return False
 
