@@ -260,7 +260,7 @@ def find_exact_file_id(order):
         query = f"'{order.design_folder_id}' in parents and name = '{design_code}'"
         page_token = None
 
-        print(f"Search: {design_code}")
+        print(f"\nSearch: {design_code}")
         log += f"\nSearch: {design_code}"
         while True:
             response = service.files().list(q=query, fields='files(id, name)', pageToken=page_token).execute()
@@ -366,14 +366,7 @@ def download_file(order):
     file_id = order.file_id
 
     #check wheter shirt is for small size or not. If True, add 'DZIECIECE' to file name.
-    if order.destination_folder == "HALFTONE_KOSZ_DZIECIECE":
-        file_name = " - ".join(["HALFTONE_KOSZ_DZIECIECE", order.order_id, f"x{order.quantity}", order.file_name])
-    elif order.destination_folder == "KOSZ_DZIECIECE":
-        file_name = " - ".join(["KOSZ_DZIECIECE", order.order_id, f"x{order.quantity}", order.file_name])
-    elif order.destination_folder == "HALFTONE_KOSZ_DOROSLI":
-        file_name = " - ".join(["HALFTONE_KOSZ_DOROSLI", order.order_id, f"x{order.quantity}", order.file_name])
-    else:
-        file_name = " - ".join(["KOSZ_DOROSLI", order.order_id, f"x{order.quantity}", order.file_name])
+    file_name = " - ".join([order.destination_folder, order.order_id, f"x{order.quantity}", order.file_name])
     request = service.files().get_media(fileId=file_id)
 
     file = io.BytesIO()
@@ -388,8 +381,9 @@ def download_file(order):
     #     file_path = os.path.join(folder_path, order.product_type, file_name)
     #     category_folder = os.path.join(folder_path, order.product_type)
 
-    file_path = os.path.join(folder_path, order.destination_folder, file_name)
-    category_folder = os.path.join(folder_path, order.destination_folder)
+    # Join strings to path
+    file_path = os.path.join(folder_path, order.design_color, order.destination_folder, file_name)
+    category_folder = os.path.join(folder_path, order.design_color, order.destination_folder)
 
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
