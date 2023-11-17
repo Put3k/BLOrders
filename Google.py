@@ -1,10 +1,13 @@
 import pickle
 import os
+import sys
 
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 from datetime import datetime
+
+from utils import resource_path
 
 
 def create_service(client_secret_file, api_name, api_version, *scopes):
@@ -14,7 +17,6 @@ def create_service(client_secret_file, api_name, api_version, *scopes):
     cred = None
 
     pickle_file = f"token_{api_name}_{api_version}.pickle"
-    # print(pickle_file)
 
     if os.path.exists(pickle_file):
         with open(pickle_file, "rb") as token:
@@ -41,3 +43,10 @@ def create_service(client_secret_file, api_name, api_version, *scopes):
 def convert_to_RFC_datetime(year=1900, month=1, day=1, hour=0, minute=0):
     dt = datetime.datetime(year, month, day, hour, minute, 0).isoformat() + "Z"
     return dt
+
+
+def get_credentials():
+    if getattr(sys, "frozen", False):
+        return resource_path("credentials.json")
+    else:
+        return "credentials.json"

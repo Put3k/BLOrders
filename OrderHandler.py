@@ -6,7 +6,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 from Google import create_service
-from DriveAPI import download_file
+from DriveAPI import download_file_by_id
 from error_handling import save_error_to_file, save_search_log_to_file
 from constants import (
     SMALL_SIZES,
@@ -236,7 +236,7 @@ def get_orders(csv_file_path):
         order_list = []
 
         for row in csv_reader:
-            if 0 < len(row):
+            if len(row) > 0:
                 if len(row[0]) > 1 or len(row[1]) > 1 or len(row[2]) > 1:
                     if (
                         "Nr zamówienia" in row
@@ -407,7 +407,7 @@ def download_file_from_order(drive_service, order, folder_path):
     if not os.path.exists(category_folder):
         os.makedirs(category_folder)
 
-    download_file(drive_service, order.file_id, file_name, category_folder)
+    download_file_by_id(drive_service, order.file_id, file_name, category_folder)
 
 
 def main(csv_file_path):
