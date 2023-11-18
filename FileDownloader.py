@@ -96,7 +96,6 @@ def download_listed_files(csv_file_path: str, drive_folder_id: str):
 
     file_data_list = list_file_data_from_csv(csv_file_path)
     found_files_list = []
-    print(file_data_list)
     recursive_download_listed_files(
         drive_service, drive_folder_id, file_data_list, found_files_list
     )

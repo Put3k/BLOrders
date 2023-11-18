@@ -164,7 +164,7 @@ def download_file_by_id(
 def find_files_id_from_list(
     drive_service, drive_folder_id, file_data_list, found_files_list
 ):
-    for i, file_data in enumerate(file_data_list):
+    for i, file_data in enumerate(file_data_list.copy()):
         query = f"'{drive_folder_id}' in parents and name contains '{file_data['design']}' and name contains '{file_data['endcode']}'"
 
         results = drive_service.files().list(q=query).execute().get("files", [])
@@ -177,7 +177,7 @@ def find_files_id_from_list(
             }
             print(f"Found file: {result_data['name']}, {result_data['id']}")
             found_files_list.append(result_data)
-            file_data_list.pop(i)
+            file_data_list.pop(file_data_list.index(file_data))
         else:
             pass
             print(f"Not Found: {file_data['design']}_{file_data['endcode']}")
