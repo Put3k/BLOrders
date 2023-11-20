@@ -15,3 +15,8 @@ with open(DRIVES_PATH) as f:
     BLACK_SHIRT_FOLDER_ID = drive_dest.get("BLACK_SHIRT_FOLDER_ID")
     BLACK_CUP_FOLDER_ID = drive_dest.get("BLACK_CUP_FOLDER_ID")
     BLACK_HALFTONE_SHIRT_FOLDER_ID = drive_dest.get("BLACK_HALFTONE_SHIRT_FOLDER_ID")
+    DOWNLOAD_DESIGNS_FOLDER_ID = drive_dest.get("DOWNLOAD_DESIGNS_FOLDER_ID")
+
+    API_NAME = drive_dest.get("API_NAME")
+    API_VERSION = drive_dest.get("API_VERSION")
+    SCOPES = drive_dest.get("SCOPES")

@@ -8,6 +8,7 @@ from google.auth.transport.requests import Request
 from datetime import datetime
 
 from utils import resource_path
+from constants import API_NAME, API_VERSION, SCOPES
 
 
 def create_service(client_secret_file, api_name, api_version, *scopes):
@@ -38,6 +39,10 @@ def create_service(client_secret_file, api_name, api_version, *scopes):
         return service
     except Exception as e:
         raise Exception(e)
+
+
+def get_service():
+    return create_service(get_credentials(), API_NAME, API_VERSION, SCOPES)
 
 
 def convert_to_RFC_datetime(year=1900, month=1, day=1, hour=0, minute=0):

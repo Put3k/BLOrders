@@ -1,111 +1,61 @@
-import csv
 import time
 
-from datetime import timedelta
+from datetime import datetime
 
-from Google import create_service, get_credentials
-from DriveAPI import list_folders, download_file_by_id, find_files_id_from_list
-from utils import list_file_data_from_csv
-
-
-def list_files_and_folders(drive_service, drive_folder_id):
-    files = (
-        drive_service.files()
-        .list(q=f"mimeType contains 'image/'")
-        .execute()
-        .get("files", [])
-    )
-    folders = (
-        drive_service.files()
-        .list(q=f"mimeType='application/vnd.google-apps.folder'")
-        .execute()
-        .get("files", [])
-    )
-
-    return files, folders
-
-
-def download_all_drive_traverse(
-    drive_service,
-    drive_folder_id,
-    destination_folder,
-):
-    files, folders = list_files_and_folders(drive_service, drive_folder_id)
-
-    if files:
-        for file in files:
-            download_file_by_id(
-                drive_service,
-                file_id=file["id"],
-                file_name=file["name"].replace(" ", "_"),
-                destination_folder=destination_folder,
-            )
-
-    if folders:
-        for folder in folders:
-            download_all_drive_traverse(drive_service, folder["id"], destination_folder)
-
-
-def download_all_files():
-    drive_service = create_service(
-        get_credentials(), "drive", "v3", ["https://www.googleapis.com/auth/drive"]
-    )
-
-    start_time = time.time()
-    download_all_drive_traverse(
-        drive_service,
-        drive_folder_id="1KHn6jTOiGxO5DRekWnLRM_SyxCNiQ-_3",
-        destination_folder=r"E:\WinLuk\GRAFIKI_WL",
-    )
-    end_time = time.time()
-    process_time = str(timedelta(seconds=(end_time - start_time))).split(":")
-    print(
-        "Download finished in ",
-        process_time[0],
-        "Hours",
-        process_time[1],
-        "Minutes",
-        process_time[2],
-        "Seconds",
-    )
-
-
-def recursive_download_listed_files(
-    drive_service, drive_folder_id: str, file_data_list, found_files_list
-) -> list:
-    find_files_id_from_list(
-        drive_service, drive_folder_id, file_data_list, found_files_list
-    )
-
-    folders = list_folders(drive_service, drive_folder_id)
-
-    if folders:
-        for folder in folders:
-            recursive_download_listed_files(
-                drive_service=drive_service,
-                drive_folder_id=folder["id"],
-                file_data_list=file_data_list,
-                found_files_list=found_files_list,
-            )
+from Google import get_service
+from DriveAPI import (
+    recursive_find_file_id_in_folder,
+    map_folder_id_to_design,
+    download_file_by_id,
+)
+from utils import list_file_data_from_csv, get_default_folder_path
+from constants import DOWNLOAD_DESIGNS_FOLDER_ID
+from error_handling import save_error_to_file, save_list_to_csv
 
 
 def download_listed_files(csv_file_path: str, drive_folder_id: str):
-    drive_service = create_service(
-        get_credentials(), "drive", "v3", ["https://www.googleapis.com/auth/drive"]
-    )
-
+    drive_service = get_service()
     file_data_list = list_file_data_from_csv(csv_file_path)
-    found_files_list = []
-    recursive_download_listed_files(
-        drive_service, drive_folder_id, file_data_list, found_files_list
-    )
+    map_folder_id_to_design(drive_service, file_data_list, drive_folder_id)
 
-    print(file_data_list)
-    print(found_files_list)
+    folder_path = get_default_folder_path()
+    missing_files = []
+
+    print("\nDownload files")
+    for item in file_data_list:
+        item_name = f"{item['design']}_{item['endcode']}"
+        print(f"Processing {item_name}")
+        if not item.get("folder_id"):
+            print(f"No folder found for {item_name}")
+            continue
+        file_data = recursive_find_file_id_in_folder(
+            drive_service, item["design"], item["endcode"], item.get("folder_id")
+        )
+        if file_data:
+            download_file_by_id(
+                drive_service,
+                file_data["id"],
+                file_data["name"],
+                folder_path,
+            )
+        else:
+            message = f"Not found {item_name}"
+            print(message)
+            save_error_to_file(
+                message,
+                folder_path,
+                datetime_string=datetime.now().strftime("%d-%m-%Y - %H%M%S"),
+            )
+            missing_files.append(item_name)
+
+    save_list_to_csv(missing_files, get_default_folder_path(), "missing_files.csv")
 
 
 if __name__ == "__main__":
+    start_time = time.time()
     download_listed_files(
-        csv_file_path=r"E:\\WinShirt\\BLOrders\\lista_brakujacych_grafik — kopia.csv",
-        drive_folder_id="1KHn6jTOiGxO5DRekWnLRM_SyxCNiQ-_3",
+        csv_file_path=r"E:\WinShirt\BLOrders\lista_brakujacych_grafik.csv",
+        drive_folder_id=DOWNLOAD_DESIGNS_FOLDER_ID,
     )
+    end_time = time.time()
+    print(f"Finished in {end_time-start_time}")
