@@ -6,7 +6,7 @@ from googleapiclient.discovery import Resource
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 
-from error_handling import save_error_to_file
+from error_handling import save_error_to_file, save_search_log_to_file
 from utils import get_default_folder_path
 
 
@@ -188,6 +188,72 @@ def download_file_by_id(
 
     with open(file_path, "wb") as f:
         f.write(file.read())
+
+
+def find_file_in_folder_by_keywords(drive_service: Resource, keywords: list, root_folder_id: str = None) -> dict:
+    """
+    Find file that contains keywords in name. If root folder id is provided it will narrow down search to specified
+    folder.
+
+    :return: dict, {"name": "file_name", "id": "file_id"}
+    """
+
+    log = "\n"
+
+    if not all(isinstance(keyword, str) for keyword in keywords):
+        raise ValueError("Keywords must be a list of strings.")
+
+    query_parts = {
+    }
+
+    if root_folder_id:
+        query_parts["parent"] = f"'{root_folder_id}' in parents"
+
+    for i, keyword in enumerate(keywords):
+        query_parts[f"keyword_{i}"] = f"name contains '{keyword}'"
+
+    query = " and ".join(query_parts.values())
+    code_name = "_".join(keywords)
+
+    found_files = []
+
+    print(log_line := f"\nSearch for {code_name}...")
+    log += log_line
+
+    try:
+        page_token = None
+        while True:
+            response = (
+                drive_service.files()
+                .list(
+                    q=query,
+                    spaces="drive",
+                    fields="nextPageToken, files(id, name)",
+                    pageToken=page_token,
+                )
+                .execute()
+            )
+            for folder in response.get("files", []):
+                print(log_line := f'Found file: {folder.get("name")}')
+                log += log_line
+            found_files.extend(response.get("files", []))
+            page_token = response.get("nextPageToken", None)
+            if page_token is None:
+                break
+
+    except HttpError as error:
+        print(log_line := f"An error occurred: {error}")
+        log += log_line
+
+    if found_files:
+        shortest_file = min(found_files, key=lambda x: len(x["name"]))
+        shortest_file["name"] = shortest_file["name"].replace(" ", "_")
+        save_search_log_to_file(log, get_default_folder_path(), datetime.datetime.now().strftime("%d-%m-%Y - %H%M%S"))
+        return shortest_file
+    else:
+        print(log_line := f"Not found {code_name}")
+        log += log_line
+        save_search_log_to_file(log, get_default_folder_path(), datetime.datetime.now().strftime("%d-%m-%Y - %H%M%S"))
 
 
 def find_file_in_folder(
