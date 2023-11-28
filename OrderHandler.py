@@ -6,7 +6,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 from Google import create_service
-from DriveAPI import download_file_by_id
+from DriveAPI import download_file_by_id, find_file_in_folder_by_keywords
 from error_handling import save_error_to_file, save_search_log_to_file
 from constants import (
     SMALL_SIZES,
@@ -99,6 +99,21 @@ def get_file_type(product_type):
         return None
 
 
+def find_file_id(
+        drive_service, keywords, root_folder_id
+):
+    file_data = find_file_in_folder_by_keywords(
+        drive_service=drive_service,
+        keywords=keywords,
+        root_folder_id=root_folder_id
+    )
+
+    if file_data:
+        return file_data["id"], file_data["name"]
+
+    return None, None
+
+
 class Order:
     drive_service = None
 
@@ -121,9 +136,10 @@ class Order:
 
         self.design_folder_id = self.get_folder_id()
         self.searched_codes = []
-        self.file_id, self.file_name = recursive_find_exact_file_id(
-            self.drive_service, self
-        )  # design file id in Google Drive
+        self.file_id, self.file_name = find_file_id(
+            drive_service=self.drive_service,
+            keywords=self.get_keywords(),
+            root_folder_id=self.design_folder_id)
         self.is_adult = is_adult(
             self.sku
         )  # Is a small or big format print (big => adults; samll => kids)
@@ -148,6 +164,14 @@ class Order:
                 return WHITE_CUP_FOLDER_ID
             elif self.design_color == "black":
                 return BLACK_CUP_FOLDER_ID
+
+    def get_keywords(self):
+        keywords = []
+        keywords.extend(self.code.split(sep="_"))
+        if self.design_color == "black_ht":
+            keywords.append("H999")
+
+        return keywords
 
     # returns color of design
     def get_design_color(self):
@@ -324,29 +348,6 @@ def find_exact_file_id(drive_service, order):
         return None, None
 
 
-def recursive_find_exact_file_id(drive_service, order):
-    design_id, file_name = find_exact_file_id(drive_service, order)
-    order.searched_codes.append(order.code)
-
-    if not design_id:
-        next_code_1 = recursive_code_generator(order)
-
-        if next_code_1 and order.code not in order.searched_codes:
-            result = recursive_find_exact_file_id(drive_service, order)
-            if result:
-                return result
-
-        next_code_2 = get_no_endcode(order)
-        if next_code_2 and order.code not in order.searched_codes:
-            result = recursive_find_exact_file_id(drive_service, order)
-            if result:
-                return result
-
-        return None, None
-    else:
-        return design_id, file_name
-
-
 def recursive_code_generator(order):
     if order.design_name and order.endcode:
         current_code = order.code
@@ -376,16 +377,6 @@ def get_no_endcode(order):
             return True
 
     return None
-
-
-def list_order_files_id(drive_service, order_list):
-    for order in order_list:
-        file_id = find_exact_file_id(drive_service, order)
-        if not file_id:
-            next_search_code = "_".join(order.design_name, order.endcode)
-            order.code = next_search_code
-            find_exact_file_id(drive_service, order)
-        order.file_id = file_id
 
 
 def download_file_from_order(drive_service, order, folder_path):
