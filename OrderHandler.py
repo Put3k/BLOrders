@@ -379,7 +379,7 @@ def get_no_endcode(order):
     return None
 
 
-def download_file_from_order(drive_service, order, folder_path):
+def find_file_and_download(drive_service, order, folder_path, download_files=True):
     file_name = " - ".join(
         [
             order.destination_folder,
@@ -398,10 +398,11 @@ def download_file_from_order(drive_service, order, folder_path):
     if not os.path.exists(category_folder):
         os.makedirs(category_folder)
 
-    download_file_by_id(drive_service, order.file_id, file_name, category_folder)
+    if download_files:
+        download_file_by_id(drive_service, order.file_id, file_name, category_folder)
 
 
-def main(csv_file_path):
+def main(csv_file_path, download_files=True):
     # Get credentials file path
     if getattr(sys, "frozen", False):
         client_secret_file = resource_path("credentials.json")
@@ -436,7 +437,7 @@ def main(csv_file_path):
 
         for order in order_list:
             if order.file_id:
-                download_file_from_order(drive_service, order, folder_path)
+                find_file_and_download(drive_service, order, folder_path, download_files=download_files)
                 order_download_count += 1
             else:
                 save_error_to_file(
