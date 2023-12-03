@@ -431,6 +431,7 @@ def main(csv_file_path, download_files=True):
     folder_path = os.path.join(os.getcwd(), f"Baselinker - {datetime_string}")
 
     if csv_file_path and drive_service:
+        # TODO add counter for found files and downloaded files
         order_list = get_orders(csv_file_path)
         order_count = len(order_list)
         order_download_count = 0
