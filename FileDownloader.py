@@ -49,13 +49,3 @@ def download_listed_files(csv_file_path: str, drive_folder_id: str):
             missing_files.append(item_name)
 
     save_list_to_csv(missing_files, get_default_folder_path(), "missing_files.csv")
-
-
-if __name__ == "__main__":
-    start_time = time.time()
-    download_listed_files(
-        csv_file_path=r"E:\WinShirt\BLOrders\lista_brakujacych_grafik.csv",
-        drive_folder_id=DOWNLOAD_DESIGNS_FOLDER_ID,
-    )
-    end_time = time.time()
-    print(f"Finished in {end_time-start_time}")
