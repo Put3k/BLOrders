@@ -434,12 +434,16 @@ def main(csv_file_path, download_files=True):
         # TODO add counter for found files and downloaded files
         order_list = get_orders(csv_file_path)
         order_count = len(order_list)
+        order_file_exists_count = 0
         order_download_count = 0
 
         for order in order_list:
             if order.file_id:
                 find_file_and_download(drive_service, order, folder_path, download_files=download_files)
-                order_download_count += 1
+
+                order_file_exists_count += 1
+                if download_files:
+                    order_download_count += 1
             else:
                 save_error_to_file(
                     f"\nOrder file id not found: {order.order_id} - {order.sku}\n",
@@ -456,7 +460,7 @@ def main(csv_file_path, download_files=True):
                 datetime_string,
             )
 
-        return order_count, order_download_count
+        return order_count, order_download_count, order_file_exists_count
 
     else:
         return False
