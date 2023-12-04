@@ -379,7 +379,7 @@ def get_no_endcode(order):
     return None
 
 
-def download_file_from_order(drive_service, order, folder_path):
+def find_file_and_download(drive_service, order, folder_path, download_files=True):
     file_name = " - ".join(
         [
             order.destination_folder,
@@ -398,10 +398,11 @@ def download_file_from_order(drive_service, order, folder_path):
     if not os.path.exists(category_folder):
         os.makedirs(category_folder)
 
-    download_file_by_id(drive_service, order.file_id, file_name, category_folder)
+    if download_files:
+        download_file_by_id(drive_service, order.file_id, file_name, category_folder)
 
 
-def main(csv_file_path):
+def main(csv_file_path, download_files=True):
     # Get credentials file path
     if getattr(sys, "frozen", False):
         client_secret_file = resource_path("credentials.json")
@@ -430,14 +431,19 @@ def main(csv_file_path):
     folder_path = os.path.join(os.getcwd(), f"Baselinker - {datetime_string}")
 
     if csv_file_path and drive_service:
+        # TODO add counter for found files and downloaded files
         order_list = get_orders(csv_file_path)
         order_count = len(order_list)
+        order_file_exists_count = 0
         order_download_count = 0
 
         for order in order_list:
             if order.file_id:
-                download_file_from_order(drive_service, order, folder_path)
-                order_download_count += 1
+                find_file_and_download(drive_service, order, folder_path, download_files=download_files)
+
+                order_file_exists_count += 1
+                if download_files:
+                    order_download_count += 1
             else:
                 save_error_to_file(
                     f"\nOrder file id not found: {order.order_id} - {order.sku}\n",
@@ -454,7 +460,7 @@ def main(csv_file_path):
                 datetime_string,
             )
 
-        return order_count, order_download_count
+        return order_count, order_download_count, order_file_exists_count
 
     else:
         return False

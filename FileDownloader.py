@@ -14,6 +14,11 @@ from error_handling import save_error_to_file, save_list_to_csv
 
 
 def download_listed_files(csv_file_path: str, drive_folder_id: str):
+    """
+    Download designs from CSV file.
+    :param csv_file_path: Absolute path to CSV file with listed designs.
+    :param drive_folder_id: Drive folder id to specify where to search for files.
+    """
     drive_service = get_service()
     file_data_list = list_file_data_from_csv(csv_file_path)
     map_folder_id_to_design(drive_service, file_data_list, drive_folder_id)
@@ -49,13 +54,3 @@ def download_listed_files(csv_file_path: str, drive_folder_id: str):
             missing_files.append(item_name)
 
     save_list_to_csv(missing_files, get_default_folder_path(), "missing_files.csv")
-
-
-if __name__ == "__main__":
-    start_time = time.time()
-    download_listed_files(
-        csv_file_path=r"E:\WinShirt\BLOrders\lista_brakujacych_grafik.csv",
-        drive_folder_id=DOWNLOAD_DESIGNS_FOLDER_ID,
-    )
-    end_time = time.time()
-    print(f"Finished in {end_time-start_time}")
