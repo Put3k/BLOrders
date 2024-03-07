@@ -99,13 +99,9 @@ def get_file_type(product_type):
         return None
 
 
-def find_file_id(
-        drive_service, keywords, root_folder_id
-):
+def find_file_id(drive_service, keywords, root_folder_id):
     file_data = find_file_in_folder_by_keywords(
-        drive_service=drive_service,
-        keywords=keywords,
-        root_folder_id=root_folder_id
+        drive_service=drive_service, keywords=keywords, root_folder_id=root_folder_id
     )
 
     if file_data:
@@ -139,7 +135,8 @@ class Order:
         self.file_id, self.file_name = find_file_id(
             drive_service=self.drive_service,
             keywords=self.get_keywords(),
-            root_folder_id=self.design_folder_id)
+            root_folder_id=self.design_folder_id,
+        )
         self.is_adult = is_adult(
             self.sku
         )  # Is a small or big format print (big => adults; samll => kids)
@@ -388,9 +385,13 @@ def find_file_and_download(drive_service, order, folder_path, download_files=Tru
             order.file_name,
         ]
     )
-    category_folder = os.path.join(
-        folder_path, order.design_color, order.destination_folder
-    )
+
+    if order.destination_folder == "Kubki":
+        category_folder = os.path.join(folder_path, "white", "Kubki")
+    else:
+        category_folder = os.path.join(
+            folder_path, order.design_color, order.destination_folder
+        )
 
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
@@ -439,7 +440,9 @@ def main(csv_file_path, download_files=True):
 
         for order in order_list:
             if order.file_id:
-                find_file_and_download(drive_service, order, folder_path, download_files=download_files)
+                find_file_and_download(
+                    drive_service, order, folder_path, download_files=download_files
+                )
 
                 order_file_exists_count += 1
                 if download_files:
