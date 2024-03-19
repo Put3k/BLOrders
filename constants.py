@@ -4,7 +4,7 @@ from utils import resource_path
 
 
 SMALL_SIZES = ["3-4", "5-6", "7-8"]
-PRODUCTS = ["LEZAK", "KOSZ", "POD", "KB_ZW", "KB_MAG", "KB_FUN"]
+PRODUCTS = ["LEZA", "KOSZ", "POD", "KB_ZW", "KB_MAG", "KB_FUN"]
 
 DRIVES_PATH = resource_path("drive_folders_destination.json")
 with open(DRIVES_PATH) as f:

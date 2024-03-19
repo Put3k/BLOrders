@@ -37,7 +37,7 @@ def find_csv_file():
 # transform sku to code.
 def get_code(sku):
     regex_filter = re.compile(
-        "(KOSZ_MES_B|KOSZ_MES_C|KOSZ_DAM_B|KOSZ_DAM_C|KOSZ_DZIEC_CHLOP_B|KOSZ_DZIEC_CHLOP_C|KOSZ_DZIEC_DZIEW_B|KOSZ_DZIEC_DZIEW_C|KOSZ_DZIEC_B|KOSZ_DZIEC_C|KB_ZW|1KB_ZW|2KB_ZW|1_KB_ZW|2_KB_ZW|V1_KB_ZW|V2_KB_ZW|KB_MAG|1KB_MAG|2KB_MAG|V1_KB_MAG|V2_KB_MAG|V1_KB_FUN_C|V2_KB_FUN_C|KB_FUN_C|1POD_ZW|2POD_ZW|POD_ZW|V1_POD_ZW|V2_POD_ZW|V1_LEZAK|V2_LEZAK|LEZAK|_XS_|_S_|_M_|_L_|_XL_|_XXL_|_3-4_|_5-6_|_7-8_|_9-11_|_12-14_)"
+        "(KOSZ_MES_B|KOSZ_MES_C|KOSZ_DAM_B|KOSZ_DAM_C|KOSZ_DZIEC_CHLOP_B|KOSZ_DZIEC_CHLOP_C|KOSZ_DZIEC_DZIEW_B|KOSZ_DZIEC_DZIEW_C|KOSZ_DZIEC_B|KOSZ_DZIEC_C|KB_ZW|1KB_ZW|2KB_ZW|1_KB_ZW|2_KB_ZW|V1_KB_ZW|V2_KB_ZW|KB_MAG|1KB_MAG|2KB_MAG|V1_KB_MAG|V2_KB_MAG|V1_KB_FUN_C|V2_KB_FUN_C|KB_FUN_C|1POD_ZW|2POD_ZW|POD_ZW|V1_POD_ZW|V2_POD_ZW|V1_LEZA|V2_LEZA|LEZA|_XS_|_S_|_M_|_L_|_XL_|_XXL_|_3-4_|_5-6_|_7-8_|_9-11_|_12-14_)"
     )
 
     code = regex_filter.sub("", sku)
@@ -79,7 +79,7 @@ def shorten_design(design):
 
 # get product type:  KB_MAG_PSY_LZ_TOARG_04C ===> KB_MAG
 def get_product_type(sku):
-    products = ["LEZAK", "KOSZ", "POD", "KB_ZW", "KB_MAG", "KB_FUN"]
+    products = ["LEZA", "KOSZ", "POD", "KB_ZW", "KB_MAG", "KB_FUN"]
 
     for product in products:
         if re.search(product, sku):
@@ -89,7 +89,7 @@ def get_product_type(sku):
 
 # get file type to download: "pdf" or "png"
 def get_file_type(product_type):
-    if product_type in ["LEZAK", "KOSZ", "POD"]:
+    if product_type in ["LEZA", "KOSZ", "POD"]:
         file_type = ".png"
         return file_type
     elif product_type in ["KB_ZW", "KB_MAG", "KB_FUN"]:
@@ -147,7 +147,7 @@ class Order:
         return f"{self.order_id} - {self.sku} - x{self.quantity}"
 
     def get_folder_id(self):
-        if self.product_type in ["KOSZ", "POD", "LEZAK"]:
+        if self.product_type in ["KOSZ", "POD", "LEZA"]:
             self.file_name = self.code + ".png"
             if self.design_color == "black_ht":
                 return BLACK_HALFTONE_SHIRT_FOLDER_ID
@@ -246,7 +246,11 @@ def is_adult(sku):
         else:
             return False
     else:
-        save_error_to_file(f"Could not determine product type from: '{sku}' file.")
+        save_error_to_file(
+            f"Could not determine product type from: '{sku}' file.",
+            folder_path,
+            datetime_string,
+        )
 
 
 # get data from csv file
@@ -388,9 +392,11 @@ def find_file_and_download(drive_service, order, folder_path, download_files=Tru
 
     if order.destination_folder == "Kubki":
         category_folder = os.path.join(folder_path, "white", "Kubki")
+    elif order.destination_folder == "LEZA":
+        category_folder = os.path.join(folder_path, "black", "Lezaki")
     else:
         category_folder = os.path.join(
-            folder_path, order.design_color, order.destination_folder
+            folder_path, order.design_color or "", order.destination_folder
         )
 
     if not os.path.exists(folder_path):
