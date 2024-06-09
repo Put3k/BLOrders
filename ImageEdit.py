@@ -22,6 +22,20 @@ def scale_image(image, target_height, max_scale_factor):
         return None
 
 
+
+def scale_for_kid_size(image: Image, max_width_cm: int, max_height_cm: int) -> Image:
+    '''
+    Scale image to 25x20 max size.
+    '''
+    max_width_px = int((max_width_cm * 37.8) / 0.48)
+    max_height_px = int((max_height_cm * 37.8) / 0.48)
+
+    image.thumbnail((max_width_px, max_height_px))
+
+    return image
+
+
+
 def merge_images(images, output_path, target_height_cm=30, spacing_cm=1):
 
     target_height = int((target_height_cm * 37.8)/0.48)
@@ -45,7 +59,7 @@ def merge_images(images, output_path, target_height_cm=30, spacing_cm=1):
         if image_width > image_height:
             image = image.rotate(90, expand=True)
             image_width, image_height = image.size
-        
+
         if image_height > target_height:
             image.thumbnail([target_height, target_height])
             image_width, image_height = image.size
@@ -78,7 +92,7 @@ def merge_images(images, output_path, target_height_cm=30, spacing_cm=1):
         x_offset += image_width + spacing
 
     merged_image.save(output_path, dpi=(200, 200))
-        
+
 
 def split_list(list, size=6):
     return [list[i:i+size] for i in range(0, len(list), size)]

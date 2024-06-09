@@ -6,8 +6,11 @@ from googleapiclient.discovery import Resource
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 
+from PIL import Image
+
 from error_handling import save_error_to_file, save_search_log_to_file
 from utils import get_default_folder_path
+from ImageEdit import scale_for_kid_size
 
 
 def list_files(drive_service: Resource, drive_folder_id: str) -> list:
@@ -157,7 +160,7 @@ def map_folder_id_to_design(
 
 
 def download_file_by_id(
-    drive_service, file_id: str, file_name: str, destination_folder: str
+    drive_service, file_id: str, file_name: str, destination_folder: str, is_adult=True
 ) -> None:
     """
     Downloads a file from Google Drive to given destination folder with given file name.
@@ -185,9 +188,15 @@ def download_file_by_id(
         )
 
     file.seek(0)
+    if not is_adult:
+        image = Image.open(file)
+        image = scale_for_kid_size(image, max_width_cm=20, max_height_cm=25)
+        image.save(file_path)
+        return
 
     with open(file_path, "wb") as f:
         f.write(file.read())
+    return
 
 
 def find_file_in_folder_by_keywords(drive_service: Resource, keywords: list, root_folder_id: str = None) -> dict:

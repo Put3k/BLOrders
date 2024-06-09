@@ -406,7 +406,7 @@ def find_file_and_download(drive_service, order, folder_path, download_files=Tru
         os.makedirs(category_folder)
 
     if download_files:
-        download_file_by_id(drive_service, order.file_id, file_name, category_folder)
+        download_file_by_id(drive_service, order.file_id, file_name, category_folder, is_adult=order.is_adult)
 
 
 def main(csv_file_path, download_files=True):
