@@ -3,6 +3,7 @@ from datetime import datetime
 import tempfile
 import os
 
+
 def scale_image(image, target_height, max_scale_factor):
     original_width, original_height = image.size
 
@@ -22,24 +23,23 @@ def scale_image(image, target_height, max_scale_factor):
         return None
 
 
+def scale_image_to_cm(
+    image: Image, max_width_cm: int, max_height_cm: int, dpi: int = 300
+) -> Image:
+    """
+    Scale image to given max size.
+    """
 
-def scale_for_kid_size(image: Image, max_width_cm: int, max_height_cm: int) -> Image:
-    '''
-    Scale image to 25x20 max size.
-    '''
-    max_width_px = int((max_width_cm * 37.8) / 0.48)
-    max_height_px = int((max_height_cm * 37.8) / 0.48)
-
+    max_width_px = int(max_width_cm * dpi / 2.54)
+    max_height_px = int(max_height_cm * dpi / 2.54)
     image.thumbnail((max_width_px, max_height_px))
 
     return image
 
 
-
 def merge_images(images, output_path, target_height_cm=30, spacing_cm=1):
-
-    target_height = int((target_height_cm * 37.8)/0.48)
-    spacing = int((spacing_cm * 37.8)/0.48)
+    target_height = int((target_height_cm * 37.8) / 0.48)
+    spacing = int((spacing_cm * 37.8) / 0.48)
 
     total_images = len(images)
     total_spacing = (total_images - 1) * spacing
@@ -78,10 +78,11 @@ def merge_images(images, output_path, target_height_cm=30, spacing_cm=1):
         else:
             list_of_images.append(image)
 
-
     total_width += total_spacing
 
-    merged_image = Image.new('RGBA', (int(total_width), int(target_height)), (0, 0, 0, 0))
+    merged_image = Image.new(
+        "RGBA", (int(total_width), int(target_height)), (0, 0, 0, 0)
+    )
 
     x_offset = 0
     for image in list_of_images:
@@ -95,11 +96,11 @@ def merge_images(images, output_path, target_height_cm=30, spacing_cm=1):
 
 
 def split_list(list, size=6):
-    return [list[i:i+size] for i in range(0, len(list), size)]
+    return [list[i: i + size] for i in range(0, len(list), size)]
 
-#Na podstawie wskazanej ścieżki, tworzy listę list plików png dzieląc je na chunki (6 plików)
+
+# Na podstawie wskazanej ścieżki, tworzy listę list plików png dzieląc je na chunki (6 plików)
 def list_files_as_chunk(folder_path):
-
     list_of_files = os.listdir(folder_path)
     images_list = []
 
@@ -123,7 +124,15 @@ def merge(origin_folder, destination_folder):
 
     for i, chunk in enumerate(chunk_list):
         designs_count += len(chunk)
-        save_folder = os.path.join(destination_folder, f"{i+1}__{dt_string}.png")
+        save_folder = os.path.join(
+            destination_folder, f"{i+1}__{dt_string}.png")
         merge_images(chunk, save_folder, target_height, spacing)
 
     return designs_count
+
+
+if __name__ == "__main__":
+    img_dor = Image.open("DOR.png")
+    img_kid = Image.open("DZIEC.png")
+    result = scale_image_to_cm(img_dor, 20, 25)
+    result.save("result.png", dpi=(300, 300))

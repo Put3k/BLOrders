@@ -10,7 +10,7 @@ from PIL import Image
 
 from error_handling import save_error_to_file, save_search_log_to_file
 from utils import get_default_folder_path
-from ImageEdit import scale_for_kid_size
+from ImageEdit import scale_image_to_cm
 
 
 def list_files(drive_service: Resource, drive_folder_id: str) -> list:
@@ -190,8 +190,8 @@ def download_file_by_id(
     file.seek(0)
     if not is_adult:
         image = Image.open(file)
-        image = scale_for_kid_size(image, max_width_cm=20, max_height_cm=25)
-        image.save(file_path)
+        image = scale_image_to_cm(image, max_width_cm=20, max_height_cm=25, dpi=300)
+        image.save(file_path, dpi=(300, 300))
         return
 
     with open(file_path, "wb") as f:
