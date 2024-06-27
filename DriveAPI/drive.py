@@ -188,7 +188,7 @@ def download_file_by_id(
         )
 
     file.seek(0)
-    if not is_adult:
+    if not is_adult and '.pdf' not in file_path:
         image = Image.open(file)
         image = scale_image_to_cm(image, max_width_cm=20, max_height_cm=25, dpi=300)
         image.save(file_path, dpi=(300, 300))

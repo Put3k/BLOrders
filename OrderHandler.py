@@ -255,7 +255,7 @@ def is_adult(sku):
 
 # get data from csv file
 def get_orders(csv_file_path):
-    with open(csv_file_path, encoding="utf-8") as f:
+    with open(csv_file_path, encoding="utf-8-sig") as f:
         csv_reader = csv.reader(f, delimiter=";")
 
         order_list = []
