@@ -16,6 +16,7 @@ from constants import (
     BLACK_SHIRT_FOLDER_ID,
     BLACK_CUP_FOLDER_ID,
     BLACK_HALFTONE_SHIRT_FOLDER_ID,
+    GOLD_CUP_FOLDER_ID,
 )
 from utils import resource_path
 
@@ -37,7 +38,10 @@ def find_csv_file():
 # transform sku to code.
 def get_code(sku):
     regex_filter = re.compile(
-        "(KOSZ_MES_B|KOSZ_MES_C|KOSZ_DAM_B|KOSZ_DAM_C|KOSZ_DZIEC_CHLOP_B|KOSZ_DZIEC_CHLOP_C|KOSZ_DZIEC_DZIEW_B|KOSZ_DZIEC_DZIEW_C|KOSZ_DZIEC_B|KOSZ_DZIEC_C|KB_ZW|1KB_ZW|2KB_ZW|1_KB_ZW|2_KB_ZW|V1_KB_ZW|V2_KB_ZW|KB_MAG|1KB_MAG|2KB_MAG|V1_KB_MAG|V2_KB_MAG|V1_KB_FUN_C|V2_KB_FUN_C|KB_FUN_C|1POD_ZW|2POD_ZW|POD_ZW|V1_POD_ZW|V2_POD_ZW|V1_LEZA|V2_LEZA|LEZA|_XS_|_S_|_M_|_L_|_XL_|_XXL_|_3-4_|_5-6_|_7-8_|_9-11_|_12-14_)"
+        "(KOSZ_MES_B|KOSZ_MES_C|KOSZ_DAM_B|KOSZ_DAM_C|KOSZ_DZIEC_CHLOP_B|KOSZ_DZIEC_CHLOP_C|KOSZ_DZIEC_DZIEW_B"
+        "|KOSZ_DZIEC_DZIEW_C|KOSZ_DZIEC_B|KOSZ_DZIEC_C|KB_ZW|1KB_ZW|2KB_ZW|1_KB_ZW|2_KB_ZW|V1_KB_ZW|V2_KB_ZW|KB_MAG"
+        "|1KB_MAG|2KB_MAG|V1_KB_MAG|V2_KB_MAG|V1_KB_FUN_C|V2_KB_FUN_C|KB_FUN_C|KB_GOLD_GD|1POD_ZW|2POD_ZW|POD_ZW|V1_POD_ZW"
+        "|V2_POD_ZW|V1_LEZA|V2_LEZA|LEZA|_XS_|_S_|_M_|_L_|_XL_|_XXL_|_3-4_|_5-6_|_7-8_|_9-11_|_12-14_)"
     )
 
     code = regex_filter.sub("", sku)
@@ -79,7 +83,7 @@ def shorten_design(design):
 
 # get product type:  KB_MAG_PSY_LZ_TOARG_04C ===> KB_MAG
 def get_product_type(sku):
-    products = ["LEZA", "KOSZ", "POD", "KB_ZW", "KB_MAG", "KB_FUN"]
+    products = ["LEZA", "KOSZ", "POD", "KB_ZW", "KB_MAG", "KB_FUN", "KB_GOLD"]
 
     for product in products:
         if re.search(product, sku):
@@ -92,7 +96,7 @@ def get_file_type(product_type):
     if product_type in ["LEZA", "KOSZ", "POD"]:
         file_type = ".png"
         return file_type
-    elif product_type in ["KB_ZW", "KB_MAG", "KB_FUN"]:
+    elif product_type in ["KB_ZW", "KB_MAG", "KB_FUN", "KB_GOLD"]:
         file_type = ".pdf"
         return file_type
     else:
@@ -155,12 +159,14 @@ class Order:
                 return WHITE_SHIRT_FOLDER_ID
             elif self.design_color == "black":
                 return BLACK_SHIRT_FOLDER_ID
-        elif self.product_type in ["KB_ZW", "KB_MAG", "KB_FUN"]:
+        elif self.product_type in ["KB_ZW", "KB_MAG", "KB_FUN", "KB_GOLD"]:
             self.file_name = self.code + ".pdf"
             if self.design_color == "white":
                 return WHITE_CUP_FOLDER_ID
             elif self.design_color == "black":
                 return BLACK_CUP_FOLDER_ID
+            elif self.design_color == "gold":
+                return GOLD_CUP_FOLDER_ID
 
     def get_keywords(self):
         keywords = []
@@ -184,6 +190,8 @@ class Order:
 
         if "H999" in self.sku:
             return "black_ht"
+        if "KB_GOLD_GD" in self.sku:
+            return "gold"
 
         suffix = re.search(r"\d{2,4}[A-Z]", self.code)
         if suffix:
@@ -222,7 +230,7 @@ class Order:
                 if self.design_color == "black_ht":
                     return "HALFTONE_KOSZ_DOROSLI"
                 return "KOSZ_DOROSLI"
-            elif label in ["KB_ZW", "KB_FUN", "KB_MAG"]:
+            elif label in ["KB_ZW", "KB_FUN", "KB_MAG", "KB_GOLD"]:
                 return "Kubki"
             else:
                 return label
@@ -406,7 +414,13 @@ def find_file_and_download(drive_service, order, folder_path, download_files=Tru
         os.makedirs(category_folder)
 
     if download_files:
-        download_file_by_id(drive_service, order.file_id, file_name, category_folder, is_adult=order.is_adult)
+        download_file_by_id(
+            drive_service,
+            order.file_id,
+            file_name,
+            category_folder,
+            is_adult=order.is_adult,
+        )
 
 
 def main(csv_file_path, download_files=True):
