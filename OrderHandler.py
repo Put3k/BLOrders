@@ -9,6 +9,7 @@ from Google import create_service
 from DriveAPI import download_file_by_id, find_file_in_folder_by_keywords
 from error_handling import save_error_to_file, save_search_log_to_file
 from constants import (
+    CONTRACTOR,
     SMALL_SIZES,
     PRODUCTS,
     WHITE_SHIRT_FOLDER_ID,
@@ -399,7 +400,10 @@ def find_file_and_download(drive_service, order, folder_path, download_files=Tru
     )
 
     if order.destination_folder == "Kubki":
-        category_folder = os.path.join(folder_path, "white", "Kubki")
+        if CONTRACTOR == "FAKTORIA":
+            category_folder = os.path.join(folder_path, "Kubki")
+        else:
+            category_folder = os.path.join(folder_path, "Kubki", order.design_color)
     elif order.destination_folder == "LEZA":
         category_folder = os.path.join(folder_path, "black", "Lezaki")
     else:

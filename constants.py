@@ -2,6 +2,7 @@ import json
 
 from utils import resource_path
 
+CONTRACTOR = None
 
 SMALL_SIZES = ["3-4", "5-6", "7-8"]
 PRODUCTS = ["LEZA", "KOSZ", "POD", "KB_ZW", "KB_MAG", "KB_FUN", "KB_GOLD"]
