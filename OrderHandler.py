@@ -264,7 +264,7 @@ def is_adult(sku):
 
 # get data from csv file
 def get_orders(csv_file_path):
-    with open(csv_file_path, encoding="utf-8-sig") as f:
+    with open(csv_file_path) as f:
         csv_reader = csv.reader(f, delimiter=";")
 
         order_list = []
@@ -281,6 +281,10 @@ def get_orders(csv_file_path):
                         quantity_index = row.index("Ilość sztuk nadruku")
                         sku_index = row.index("SKU")
                         continue
+                    else:
+                        order_id_index = 0
+                        quantity_index = 1
+                        sku_index = 2
 
                     order_id = row[order_id_index]
                     quantity = int(row[quantity_index])
