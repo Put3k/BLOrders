@@ -394,14 +394,28 @@ def get_no_endcode(order):
 
 
 def find_file_and_download(drive_service, order, folder_path, download_files=True):
-    file_name = " - ".join(
-        [
-            order.destination_folder,
-            order.order_id,
-            f"x{order.quantity}",
-            order.file_name,
-        ]
-    )
+    file_counter = None
+    if CONTRACTOR == "FAKTORIA":
+        file_counter = order.quantity
+        base = " - ".join(
+            [
+                order.destination_folder,
+                order.order_id,
+                order.file_name,
+            ]
+        )
+        # .png/.pdf is added -> need to be removed
+        base_file_name = base.replace(order.file_type, "")
+
+    else:
+        file_name = " - ".join(
+            [
+                order.destination_folder,
+                order.order_id,
+                f"x{order.quantity}",
+                order.file_name,
+            ]
+        )
 
     if order.destination_folder == "Kubki":
         if CONTRACTOR == "FAKTORIA":
@@ -422,6 +436,10 @@ def find_file_and_download(drive_service, order, folder_path, download_files=Tru
         os.makedirs(category_folder)
 
     if download_files:
+        if CONTRACTOR == "FAKTORIA":
+            file_name = base_file_name + f" ({file_counter}){order.file_type}"
+            file_counter -= 1
+
         download_file_by_id(
             drive_service,
             order.file_id,
@@ -429,6 +447,16 @@ def find_file_and_download(drive_service, order, folder_path, download_files=Tru
             category_folder,
             is_adult=order.is_adult,
         )
+        if CONTRACTOR == "FAKTORIA":
+            import shutil
+
+            origin_file_name = file_name
+            for i in range(file_counter, 0, -1):
+                file_name = base_file_name + f" ({file_counter}){order.file_type}"
+                src = os.path.join(category_folder, origin_file_name)
+                dst = os.path.join(category_folder, file_name)
+                shutil.copyfile(src, dst)
+                file_counter -= 1
 
 
 def main(csv_file_path, download_files=True):
