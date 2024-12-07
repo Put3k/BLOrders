@@ -12,9 +12,11 @@ def resource_path(relative_path):
 
 
 def get_default_folder_path(
-    new_folder_name=f"Drive Download - {datetime.now().strftime('%d-%m-%Y - %H%M%S')}",
+    new_folder_name=None,
 ) -> str:
-    destination_path = os.path.join(os.getcwd(), new_folder_name)
+    destination_path = os.getcwd()
+    if new_folder_name:
+        destination_path = os.path.join(destination_path, new_folder_name)
 
     if not os.path.exists(destination_path):
         os.makedirs(destination_path)

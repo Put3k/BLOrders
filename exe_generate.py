@@ -18,6 +18,8 @@ output_path = Path(BASE_PATH) / "output"
 output_path.mkdir(parents=True, exist_ok=True)
 os.chdir("output/")
 
+# TODO: add exe generate per contractor
+
 subprocess.run(
     [
         "pyinstaller",
