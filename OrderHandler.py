@@ -4,6 +4,7 @@ import re
 import sys
 from datetime import datetime
 from dotenv import load_dotenv
+from contextlib import suppress
 
 from Google import create_service
 from DriveAPI import download_file_by_id, find_file_in_folder_by_keywords
@@ -271,21 +272,25 @@ def get_orders(csv_file_path):
 
         for row in csv_reader:
             if len(row) > 0:
-                if len(row[0]) > 1 or len(row[1]) > 1 or len(row[2]) > 1:
-                    if (
-                        "Nr zamówienia" in row
-                        and "Ilość sztuk nadruku" in row
-                        and "SKU" in row
-                    ):
-                        order_id_index = row.index("Nr zamówienia")
-                        quantity_index = row.index("Ilość sztuk nadruku")
-                        sku_index = row.index("SKU")
-                        continue
-                    else:
-                        order_id_index = 0
-                        quantity_index = 1
-                        sku_index = 2
+                # if (
+                #     "Nr zamówienia" in row
+                #     and "Ilość sztuk nadruku" in row
+                #     and "SKU" in row
+                # ):
+                #     order_id_index = row.index("Nr zamówienia")
+                #     quantity_index = row.index("Ilość sztuk nadruku")
+                #     sku_index = row.index("SKU")
+                #     continue
+                # elsek'IloĹ›Ä‡ sztuk nadruku':
+                #     order_id_index = 0
+                #     quantity_index = 1
+                #     sku_index = 2
 
+                order_id_index = 0
+                quantity_index = 1
+                sku_index = 2
+
+                with suppress(ValueError):
                     order_id = row[order_id_index]
                     quantity = int(row[quantity_index])
                     sku = row[sku_index]
