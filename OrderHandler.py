@@ -318,55 +318,6 @@ def get_orders(csv_file_path):
     return order_list
 
 
-def find_exact_file_id(drive_service, order):
-    log = "\n"
-
-    if order.design_folder_id and order.code and order.file_type:
-        if order.design_color == "black_ht":
-            design_code = order.code + "_H999" + order.file_type
-        else:
-            design_code = order.code + order.file_type
-
-        query = f"'{order.design_folder_id}' in parents and name = '{design_code}'"
-        page_token = None
-
-        print(f"\nSearch: {design_code}")
-        log += f"\nSearch: {design_code}"
-        while True:
-            response = (
-                drive_service.files()
-                .list(q=query, fields="files(id, name)", pageToken=page_token)
-                .execute()
-            )
-            if "files" in response:
-                for file in response.get("files", []):
-                    print(f"Found file: {file.get('name')}, {file.get('id')}\n")
-                design_id_response = response.get("files", [])
-                page_token = response.get("nextPageToken", None)
-                if page_token is None:
-                    break
-            else:
-                design_id_response = None
-                break
-
-        if design_id_response:
-            log += f"\nFound file: {file.get('name')}, {file.get('id')}\n"
-            save_search_log_to_file(log, folder_path, datetime_string)
-            design_id = design_id_response[0]["id"]
-            file_name = design_id_response[0]["name"]
-            return design_id, file_name
-
-        else:
-            print(f"Not found: {design_code}")
-            log += f"\nNot found: {design_code}"
-            save_search_log_to_file(log, folder_path, datetime_string)
-            return None, None
-
-    else:
-        print(f"Not found: {order.code}{order.file_type}")
-        return None, None
-
-
 def recursive_code_generator(order):
     if order.design_name and order.endcode:
         current_code = order.code
@@ -486,9 +437,11 @@ def main(csv_file_path, download_files=True):
         print(f"Could not get drive folders ID's")
         return False
 
+    #TODO: wtf?
     global datetime_string
     datetime_string = datetime.now().strftime("%d-%m-%Y - %H%M%S")
 
+    #TODO: wtf?
     global folder_path
     folder_path = os.path.join(os.getcwd(), f"Baselinker - {datetime_string}")
 
@@ -524,7 +477,8 @@ def main(csv_file_path, download_files=True):
                 datetime_string,
             )
 
-        return order_count, order_download_count, order_file_exists_count
+        missing_files_set = getattr(drive_service, '_missing_files_set')
+        return order_count, order_download_count, order_file_exists_count, missing_files_set
 
     else:
         return False

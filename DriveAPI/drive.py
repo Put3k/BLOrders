@@ -229,6 +229,9 @@ def find_file_in_folder_by_keywords(drive_service: Resource, keywords: list, roo
     print(log_line := f"\nSearch for {code_name}...")
     log += log_line
 
+    if not hasattr(drive_service, '_missing_files_set'):
+        drive_service._missing_files_set = set()
+
     try:
         page_token = None
         while True:
@@ -263,6 +266,7 @@ def find_file_in_folder_by_keywords(drive_service: Resource, keywords: list, roo
         print(log_line := f"Not found {code_name}")
         log += log_line
         save_search_log_to_file(log, get_default_folder_path(), datetime.datetime.now().strftime("%d-%m-%Y - %H%M%S"))
+        drive_service._missing_files_set.add(code_name)
 
 
 def find_file_in_folder(
